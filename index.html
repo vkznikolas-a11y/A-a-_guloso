@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mr. Açaí - Sistema de Pedidos</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome para Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Arquivo de Estilos -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo-container">
+            <img src="acai.png" alt="Logo Mr. Açaí" class="logo-img" onerror="this.src='https://via.placeholder.com/60?text=Mr.Açaí'">
+            <div>
+                <h1>Mr. Açaí</h1>
+                <p>Delícia Roxa & Fresca</p>
+            </div>
+        </div>
+        <div class="header-badge">
+            <i class="fa-solid fa-bolt"></i> Ultra Leve (3G)
+        </div>
+    </header>
+
+    <!-- Navegação por Abas -->
+    <nav class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('order-tab')">
+            <i class="fa-solid fa-bowl-food"></i> Montar Açaí
+        </button>
+        <button class="tab-btn" onclick="switchTab('profile-tab')">
+            <i class="fa-solid fa-user"></i> Meu Cadastro
+        </button>
+        <button class="tab-btn" onclick="switchTab('history-tab')">
+            <i class="fa-solid fa-clock-rotate-left"></i> Histórico <span id="history-badge" class="badge">0</span>
+        </button>
+    </nav>
+
+    <main class="container">
+        
+        <!-- ABA 1: MONTAR AÇAÍ -->
+        <section id="order-tab" class="tab-content active">
+            <!-- Banner de Alerta Dinâmico -->
+            <div id="alert-banner" class="alert-banner"></div>
+
+            <div class="card">
+                <h2><span class="step-num">1</span> Escolha o Tamanho do Copo/Tigela</h2>
+                <div class="options-grid" id="sizes-grid">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header-flex">
+                    <h2><span class="step-num">2</span> Selecione os Adicionais</h2>
+                    <span id="limit-badge" class="limit-indicator">Selecione um tamanho</span>
+                </div>
+                <p class="subtitle" id="additionals-subtitle">Escolha primeiro o tamanho para verificar os limites de adicionais.</p>
+                <div class="options-grid" id="additionals-grid">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+
+            <div class="card summary-card">
+                <h2><span class="step-num">3</span> Resumo e Cupom</h2>
+                
+                <div class="coupon-box">
+                    <input type="text" id="coupon-input" placeholder="Digite seu cupom (Ex: PRIMEIRA10, ACAI20...)">
+                    <button onclick="applyCoupon()" class="btn-secondary">Aplicar</button>
+                </div>
+                <div id="coupon-feedback" class="coupon-feedback"></div>
+
+                <div class="summary-details" id="summary-details">
+                    <p class="empty-summary">Nenhum tamanho selecionado ainda.</p>
+                </div>
+
+                <div class="total-row">
+                    <span>Total Final com Entrega:</span>
+                    <span id="total-price" class="total-price">R$ 0,00</span>
+                </div>
+
+                <button id="checkout-btn" class="btn-primary btn-whatsapp" onclick="finalizeOrder()" disabled>
+                    <i class="fa-brands fa-whatsapp"></i> Confirmar e Enviar pelo WhatsApp
+                </button>
+            </div>
+        </section>
+
+        <!-- ABA 2: MEU CADASTRO (OBRIGATÓRIO) -->
+        <section id="profile-tab" class="tab-content">
+            <div class="card">
+                <h2><i class="fa-solid fa-id-card"></i> Dados de Entrega (Obrigatórios)</h2>
+                <p class="subtitle">Preencha corretamente para evitarmos problemas de entrega com o motoboy.</p>
+                
+                <form id="profile-form" onsubmit="saveProfile(event)">
+                    <div class="form-group">
+                        <label for="prof-name"><i class="fa-solid fa-user-pen"></i> Nome Completo *</label>
+                        <input type="text" id="prof-name" placeholder="Ex: Cristiano Ronaldo" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="prof-phone"><i class="fa-solid fa-phone"></i> Telefone com DDD *</label>
+                        <input type="tel" id="prof-phone" placeholder="Ex: (41) 98407-3915" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prof-bairro"><i class="fa-solid fa-map-pin"></i> Bairro * (Centro = Taxa R$ 5,00 | Outros = R$ 10,00)</label>
+                        <input type="text" id="prof-bairro" placeholder="Ex: Centro, Cristo Rei, Água Verde..." oninput="updateDeliveryRateRealtime()" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prof-address"><i class="fa-solid fa-location-dot"></i> Rua, Número e Complemento *</label>
+                        <textarea id="prof-address" rows="3" placeholder="Rua José, nº 123, Apto 402..." required></textarea>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="form-actions-grid">
+                        <button type="submit" class="btn-primary">
+                            <i class="fa-solid fa-floppy-disk"></i> Salvar Cadastro
+                        </button>
+                        <button type="button" class="btn-danger-fill" onclick="clearProfileDefinitive()">
+                            <i class="fa-solid fa-trash-can"></i> Limpar Cadastro
+                        </button>
+                    </div>
+                </form>
+                <div id="profile-feedback" class="feedback-msg"></div>
+            </div>
+        </section>
+
+        <!-- ABA 3: HISTÓRICO DE PEDIDOS -->
+        <section id="history-tab" class="tab-content">
+            <div class="card">
+                <div class="history-header">
+                    <h2><i class="fa-solid fa-list-check"></i> Pedidos Realizados</h2>
+                    <button onclick="clearHistory()" class="btn-danger-outline" id="clear-history-btn"><i class="fa-solid fa-trash"></i> Limpar</button>
+                </div>
+                <p class="subtitle">Acompanhe seus pedidos anteriores e repita no WhatsApp com 1 clique.</p>
+
+                <div id="history-list" class="history-list">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal de Sucesso -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon"><i class="fa-brands fa-whatsapp"></i></div>
+            <h3>Pedido Confirmado!</h3>
+            <p>Seu pedido com taxa de entrega foi gerado e enviado ao WhatsApp.</p>
+            <div id="modal-order-details" class="modal-details"></div>
+            <button id="modal-whatsapp-btn" class="btn-primary btn-whatsapp" style="margin-bottom: 10px;">
+                <i class="fa-brands fa-whatsapp"></i> Reabrir WhatsApp
+            </button>
+            <button onclick="closeModal()" class="btn-secondary" style="width: 100%; padding: 12px;">Fazer Novo Pedido</button>
+        </div>
+    </div>
+
+    <!-- Arquivo de Lógica JS -->
+    <script src="script.js"></script>
+</body>
+</html>
